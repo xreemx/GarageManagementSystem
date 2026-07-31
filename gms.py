@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 
 class Car(ABC):
-    def __init__(self, car_number, full_name, age, racing_team, speed, capacity):  #'using double underscore for private attributes '
+    def __init__(self, car_number, full_name, age, racing_team, speed, capacity):
         self.car_number = car_number
         self.full_name = full_name
         self.age = age
@@ -12,21 +12,17 @@ class Car(ABC):
         self.speed = speed
         self.capacity = capacity
 
-    # 'attributes encapsulation'
-    #'using @property in python (getter and setter)'
-    #"car number"
     @property
     def car_number(self) -> str:
         return self._car_number
 
     @car_number.setter
     def car_number(self, value):
-        number = str(value).strip()  #"to properly clean when reading from file"
+        number = str(value).strip()
         if not number:
             raise ValueError("Enter the car number")
         self._car_number = number
 
-    # full name
     @property
     def full_name(self) -> str:
         return self._full_name
@@ -38,7 +34,6 @@ class Car(ABC):
             raise ValueError("Enter the car name")
         self._full_name = name
 
-    # age
     @property
     def age(self) -> int:
         return self._age
@@ -50,7 +45,6 @@ class Car(ABC):
             raise ValueError("Age should be a positive integer")
         self._age = Age
 
-    # racing team
     @property
     def racing_team(self) -> str:
         return self._racing_team
@@ -62,7 +56,6 @@ class Car(ABC):
             raise ValueError("Enter the team ")
         self._racing_team = team
 
-    # speed
     @property
     def speed(self) -> float:
         return self._speed
@@ -74,7 +67,6 @@ class Car(ABC):
             raise ValueError("Enter a speed value")
         self._speed = Speed
 
-    # capacity
     @property
     def capacity(self) -> float:
         return self._capacity
@@ -86,7 +78,6 @@ class Car(ABC):
             raise ValueError("Enter a capacity value")
         self._capacity = cap
 
-    # Methods
     @abstractmethod
     def per_score(self) -> float:
         pass
@@ -100,7 +91,6 @@ class Car(ABC):
         pass
 
 
-# SUBCLASSES
 class Racer(Car):
     def __init__(
         self,
@@ -203,7 +193,6 @@ class SupportVehicle(Car):
         self._reliability_rating = val
 
     def per_score(self) -> float:
-        # Support Formula: (Speed * 5) + (Capacity * 5)
         return (self.speed * 5) + (self.capacity * 5)
 
     def car_details(self) -> dict:
@@ -228,11 +217,10 @@ class SupportVehicle(Car):
         }
 
 
-# garage management functions to be used in MENU
 class garageManager:
     def __init__(self, file="radiator_springs_garage.json"):
-        self.file = file  # get the JSON file
-        self._cars = {}  # empty dictionary to link each car to its attributes like number ,speed ,etc
+        self.file = file
+        self._cars = {}
         self.loadfromfile()
 
     def carNumCheck(self, car_number) -> bool:
@@ -241,7 +229,6 @@ class garageManager:
     def check_in_car(self, car: Car) -> bool:
         if self.carNumCheck(car.car_number):
             raise ValueError("Number already exists")
-        # if not then add  it in dictionary and save in the file
         self._cars[car.car_number] = car
         self.saveToFile()
         return True
@@ -266,23 +253,19 @@ class garageManager:
             return {
                 "Cars checked in": 0,
                 "average score": 0.0,
-                "breakdown of each care": {},
-            }  # returns a dictionary
-        numofcars = len(cars)  # the length of the dict
-        averagePerformance = (
-            sum(i.per_score() for i in cars) / numofcars
-        )
-        teams = {}  # will store the breakdown of each team to be displayed
+                "breakdown of each car": {},
+            }
+        numofcars = len(cars)
+        averagePerformance = sum(i.per_score() for i in cars) / numofcars
+        teams = {}
         for i in cars:
             teams[i.racing_team] = teams.get(i.racing_team, 0) + 1
 
         return {
             "Cars checked in": numofcars,
             "average score": averagePerformance,
-            "breakdown of each care": teams,
+            "breakdown of each car": teams,
         }
-
-    # handling the files and their functitons
 
     def saveToFile(self):
         data = [car.to_dict() for car in self._cars.values()]
@@ -291,7 +274,7 @@ class garageManager:
 
     def loadfromfile(self):
         if not os.path.isfile(self.file):
-            return  # to prevent file not found error
+            return
 
         try:
             with open(self.file, "r") as file:
@@ -306,7 +289,7 @@ class garageManager:
                         racing_team=item["racing_team"],
                         speed=item["speed"],
                         capacity=item["capacity"],
-                        races_completed=item.get("extra_attributes", {}).get("races_completed", 0),  # extra
+                        races_completed=item.get("extra_attributes", {}).get("races_completed", 0),
                         laps_completed=item.get("extra_attributes", {}).get("laps_completed", 0),
                     )
                 elif item.get("type") == "SupportVehicle":
@@ -317,7 +300,7 @@ class garageManager:
                         racing_team=item["racing_team"],
                         speed=item["speed"],
                         capacity=item["capacity"],
-                        crew_size=item.get("extra_attributes", {}).get("crew_size", 1),  # extra
+                        crew_size=item.get("extra_attributes", {}).get("crew_size", 1),
                         reliability_rating=item.get("extra_attributes", {}).get("reliability_rating", 10.0),
                     )
                 if car:
@@ -326,7 +309,6 @@ class garageManager:
             print(f"Error loading file: {e}")
 
 
-# the main menu
 def main():
     manager = garageManager()
 
@@ -339,7 +321,7 @@ def main():
         print("5. Generate Garage Report")
         print("6. Exit")
 
-        choice = input("Select an Option : ").strip()
+        choice = input("Select an Option (1-6): ").strip()
 
         if choice == "1":
             vehicleType = input("Enter vehicle type (1. Racer, 2. Support Vehicle): ").strip()
@@ -400,7 +382,7 @@ def main():
             print(f"Total Vehicles : {report['Cars checked in']}")
             print(f"Average Score  : {report['average score']:.2f}")
             print("Team Breakdown :")
-            for team_name, count in report["breakdown of each care"].items():
+            for team_name, count in report["breakdown of each car"].items():
                 print(f"  - {team_name}: {count} vehicle(s)")
 
         elif choice == "6":
@@ -408,7 +390,7 @@ def main():
             break
 
         else:
-            print(" Invalid menu choice. Please select 1-6.")
+            print("Invalid menu choice. Please select 1-6.")
 
 
 if __name__ == "__main__":
