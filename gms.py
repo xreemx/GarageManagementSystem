@@ -1,4 +1,4 @@
-mport json
+import json
 import os
 from abc import ABC, abstractmethod
 
@@ -226,3 +226,143 @@ class SupportVehicle(Car):
                 "reliability_rating": self.reliability_rating,
             },
         }
+
+
+# garage management functions to be used in MENU
+class garageManager:
+    def __init__(self, file="radiator_springs_garage.json"):
+        self.file = file  # get the JSON file
+        self._cars = {}  # empty dictionary to link each car to its attributes like number ,speed ,etc
+        self.loadfromfile()
+
+    def carNumCheck(self, car_number) -> bool:
+        return str(car_number).strip() in self._cars
+
+    def check_in_car(self, car: Car) -> bool:
+        if self.carNumCheck(car.car_number):
+            raise ValueError("Number already exists")
+        # if not then add  it in dictionary and save in the file
+        self._cars[car.car_number] = car
+        self.saveToFile()
+        return True
+
+    def find_car(self, car_number: str):
+        return self._cars.get(str(car_number).strip())
+
+    def viewallcars(self) -> list:
+        return list(self._cars.values())
+
+    def carRetire(self, car_number) -> bool:
+        num = str(car_number).strip()
+        if num in self._cars:
+            del self._cars[num]
+            self.saveToFile()
+            return True
+        return False
+
+    def reportCars(self) -> dict:
+        cars = self.viewallcars()
+        if not cars:
+            return {
+                "Cars checked in": 0,
+                "average score": 0.0,
+                "breakdown of each car": {},
+            }  # returns a dictionary
+        numofcars = len(cars)  # the length of the dict
+        averagePerformance = (
+            sum(i.per_score() for i in cars) / numofcars
+        )
+        teams = {}  # will store the breakdown of each team to be displayed
+        for i in cars:
+            teams[i.racing_team] = teams.get(i.racing_team, 0) + 1
+
+        return {
+            "Cars checked in": numofcars,
+            "average score": averagePerformance,
+            "breakdown of each care": teams,
+        }
+
+    # handling the files and their functitons
+
+    def saveToFile(self):
+        data = [car.to_dict() for car in self._cars.values()]
+        with open(self.file, "w") as file:
+            json.dump(data, file, indent=4)
+
+    def loadfromfile(self):
+        if not os.path.isfile(self.file):
+            return  # to prevent file not found error
+
+        try:
+            with open(self.file, "r") as file:
+                data = json.load(file)
+            for item in data:
+                car = None
+                if item.get("type") == "Racer":
+                    car = Racer(
+                        car_number=item["car_number"],
+                        full_name=item["full_name"],
+                        age=item["age"],
+                        racing_team=item["racing_team"],
+                        speed=item["speed"],
+                        capacity=item["capacity"],
+                        races_completed=item.get("extra_attributes", {}).get("races_completed", 0),  # extra
+                        laps_completed=item.get("extra_attributes", {}).get("laps_completed", 0),
+                    )
+                elif item.get("type") == "SupportVehicle":
+                    car = SupportVehicle(
+                        car_number=item["car_number"],
+                        full_name=item["full_name"],
+                        age=item["age"],
+                        racing_team=item["racing_team"],
+                        speed=item["speed"],
+                        capacity=item["capacity"],
+                        crew_size=item.get("extra_attributes", {}).get("crew_size", 1),  # extra
+                        reliability_rating=item.get("extra_attributes", {}).get("reliability_rating", 10.0),
+                    )
+                if car:
+                    self._cars[car.car_number] = car
+        except Exception as e:
+            print(f"Error loading file: {e}")
+            
+            
+#the main menu             
+            
+ def main():
+     while True:
+         print("\n===RADIATOR SPRINGS GARAGE MANAGER===")
+        print("1. Check In New Vehicle")
+        print("2. Search Vehicle by Number")
+        print("3. View All Vehicles")
+        print("4. Retire Vehicle")
+        print("5. Generate Garage Report")
+        print("6. Exit")
+     
+        choice = input("Select an Option ")  
+        if(choice == 1):
+            vehicleType = input("Enter the vehicle type 1.Racer 2.Vehicle support")
+            try:
+                num = input("Car Number: ").strip()
+                name = input("Full Name: ").strip()
+                age = input("Age: ").strip()
+                team = input("Racing Team: ").strip()
+                speed = input("Speed: ").strip()
+                cap = input("Capacity: ").strip()        
+              
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+ 
+            
