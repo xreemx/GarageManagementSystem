@@ -253,7 +253,7 @@ class garageManager:
             return {
                 "Cars checked in": 0,
                 "average score": 0.0,
-                "breakdown of each car": {},
+                "breakdown of each care": {},
             }
         numofcars = len(cars)
         averagePerformance = sum(i.per_score() for i in cars) / numofcars
@@ -264,7 +264,7 @@ class garageManager:
         return {
             "Cars checked in": numofcars,
             "average score": averagePerformance,
-            "breakdown of each car": teams,
+            "breakdown of each care": teams,
         }
 
     def saveToFile(self):
@@ -316,12 +316,13 @@ def main():
         print("\n=== RADIATOR SPRINGS GARAGE MANAGER ===")
         print("1. Check In New Vehicle")
         print("2. Search Vehicle by Number")
-        print("3. View All Vehicles")
-        print("4. Retire Vehicle")
-        print("5. Generate Garage Report")
-        print("6. Exit")
+        print("3. Tune-Up Vehicle")
+        print("4. View All Vehicles")
+        print("5. Retire Vehicle")
+        print("6. Generate Garage Report")
+        print("7. Exit")
 
-        choice = input("Select an Option (1-6): ").strip()
+        choice = input("Select an Option: ").strip()
 
         if choice == "1":
             vehicleType = input("Enter vehicle type (1. Racer, 2. Support Vehicle): ").strip()
@@ -361,6 +362,62 @@ def main():
                 print("Vehicle not found.")
 
         elif choice == "3":
+            print("\n--- Tune-Up Vehicle ---")
+            num = input("Enter Car Number to Tune-Up: ").strip()
+            car = manager.find_car(num)
+
+            if not car:
+                print("Vehicle not found.")
+            else:
+                print("Press ENTER to keep the existing value.\n")
+
+                try:
+                    new_name = input(f"Full Name [{car.full_name}]: ").strip()
+                    if new_name:
+                        car.full_name = new_name
+
+                    new_age = input(f"Age [{car.age}]: ").strip()
+                    if new_age:
+                        car.age = int(new_age)
+
+                    new_team = input(f"Racing Team [{car.racing_team}]: ").strip()
+                    if new_team:
+                        car.racing_team = new_team
+
+                    new_speed = input(f"Speed [{car.speed}]: ").strip()
+                    if new_speed:
+                        car.speed = float(new_speed)
+
+                    new_cap = input(f"Capacity [{car.capacity}]: ").strip()
+                    if new_cap:
+                        car.capacity = float(new_cap)
+
+                    if isinstance(car, Racer):
+                        new_races = input(f"Races Completed [{car.races_completed}]: ").strip()
+                        if new_races:
+                            car.races_completed = int(new_races)
+
+                        new_laps = input(f"Laps Completed [{car.laps_completed}]: ").strip()
+                        if new_laps:
+                            car.laps_completed = int(new_laps)
+
+                    elif isinstance(car, SupportVehicle):
+                        new_crew = input(f"Crew Size [{car.crew_size}]: ").strip()
+                        if new_crew:
+                            car.crew_size = int(new_crew)
+
+                        new_rel = input(f"Reliability Rating [{car.reliability_rating}]: ").strip()
+                        if new_rel:
+                            car.reliability_rating = float(new_rel)
+
+                    # Save to file using exact method name
+                    manager.saveToFile()
+                    print(f"Vehicle #{car.car_number} updated successfully!")
+
+                except ValueError as e:
+                    print(f"Update failed: {e}")
+
+        elif choice == "4":
             cars = manager.viewallcars()
             if not cars:
                 print("No vehicles in garage.")
@@ -368,7 +425,7 @@ def main():
                 for c in cars:
                     print(f"- #{c.car_number}: {c.full_name} ({c.__class__.__name__}) | Team: {c.racing_team} | Score: {c.per_score()}")
 
-        elif choice == "4":
+        elif choice == "5":
             print("\n--- Retire Vehicle ---")
             num = input("Enter Car Number to Retire: ").strip()
             if manager.carRetire(num):
@@ -376,21 +433,21 @@ def main():
             else:
                 print("Vehicle not found.")
 
-        elif choice == "5":
+        elif choice == "6":
             print("\n--- Garage Performance Report ---")
             report = manager.reportCars()
             print(f"Total Vehicles : {report['Cars checked in']}")
             print(f"Average Score  : {report['average score']:.2f}")
             print("Team Breakdown :")
-            for team_name, count in report["breakdown of each car"].items():
+            for team_name, count in report["breakdown of each care"].items():
                 print(f"  - {team_name}: {count} vehicle(s)")
 
-        elif choice == "6":
+        elif choice == "7":
             print("\nGoodbye! All garage data is safely saved.")
             break
 
         else:
-            print("Invalid menu choice. Please select 1-6.")
+            print("Invalid menu choice. Please select 1-7.")
 
 
 if __name__ == "__main__":
