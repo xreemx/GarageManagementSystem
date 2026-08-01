@@ -217,6 +217,54 @@ class SupportVehicle(Car):
         }
 
 
+class AmbulanceCar(Car):
+    def __init__(
+        self,
+        car_number,
+        full_name,
+        age,
+        racing_team,
+        speed,
+        capacity,
+        medical_level_score,
+    ):
+        super().__init__(car_number, full_name, age, racing_team, speed, capacity)
+        self.medical_level_score = medical_level_score
+
+    @property
+    def medical_level_score(self) -> float:
+        return self._medical_level_score
+
+    @medical_level_score.setter
+    def medical_level_score(self, value):
+        val = float(value)
+        if not (0<= val <= 10)  :
+            raise ValueError("Enter a valid number between 0 and 10")
+        self._medical_level_score = val
+
+    def per_score(self) -> float:
+        return (self.speed * 10) + (self.capacity * 10)
+
+    def car_details(self) -> dict:
+        return {
+            "medical_level_score": self.medical_level_score,
+        }
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "AmbulanceCar",
+            "car_number": self.car_number,
+            "full_name": self.full_name,
+            "age": self.age,
+            "racing_team": self.racing_team,
+            "speed": self.speed,
+            "capacity": self.capacity,
+            "extra_attributes": {
+                "medical_level_score": self.medical_level_score,
+            },
+        }
+
+
 class garageManager:
     def __init__(self, file="radiator_springs_garage.json"):
         self.file = file
@@ -281,7 +329,10 @@ class garageManager:
                 data = json.load(file)
             for item in data:
                 car = None
-                if item.get("type") == "Racer":
+                car_type = item.get("type")
+                extras = item.get("extra_attributes", {})
+
+                if car_type == "Racer":
                     car = Racer(
                         car_number=item["car_number"],
                         full_name=item["full_name"],
@@ -289,10 +340,10 @@ class garageManager:
                         racing_team=item["racing_team"],
                         speed=item["speed"],
                         capacity=item["capacity"],
-                        races_completed=item.get("extra_attributes", {}).get("races_completed", 0),
-                        laps_completed=item.get("extra_attributes", {}).get("laps_completed", 0),
+                        races_completed=extras.get("races_completed", 0),
+                        laps_completed=extras.get("laps_completed", 0),
                     )
-                elif item.get("type") == "SupportVehicle":
+                elif car_type == "SupportVehicle":
                     car = SupportVehicle(
                         car_number=item["car_number"],
                         full_name=item["full_name"],
@@ -300,8 +351,18 @@ class garageManager:
                         racing_team=item["racing_team"],
                         speed=item["speed"],
                         capacity=item["capacity"],
-                        crew_size=item.get("extra_attributes", {}).get("crew_size", 1),
-                        reliability_rating=item.get("extra_attributes", {}).get("reliability_rating", 10.0),
+                        crew_size=extras.get("crew_size", 1),
+                        reliability_rating=extras.get("reliability_rating", 10.0),
+                    )
+                elif car_type == "AmbulanceCar":
+                    car = AmbulanceCar(
+                        car_number=item["car_number"],
+                        full_name=item["full_name"],
+                        age=item["age"],
+                        racing_team=item["racing_team"],
+                        speed=item["speed"],
+                        capacity=item["capacity"],
+                        medical_level_score=extras.get("medical_level_score", 0.0),
                     )
                 if car:
                     self._cars[car.car_number] = car
@@ -325,7 +386,7 @@ def main():
         choice = input("Select an Option: ").strip()
 
         if choice == "1":
-            vehicleType = input("Enter vehicle type (1. Racer, 2. Support Vehicle): ").strip()
+            vehicleType = input("Enter vehicle type (1. Racer, 2. Support Vehicle, 3. Ambulance): ").strip()
             try:
                 num = input("Car Number: ").strip()
                 name = input("Full Name: ").strip()
@@ -342,6 +403,9 @@ def main():
                     crew = input("Crew Size: ").strip()
                     rel = input("Reliability Rating: ").strip()
                     car = SupportVehicle(num, name, age, team, speed, cap, crew, rel)
+                elif vehicleType == "3":
+                    med_score = input("Medical Level Score: ").strip()
+                    car = AmbulanceCar(num, name, age, team, speed, cap, med_score)
                 else:
                     print("Invalid vehicle type selected.")
                     continue
@@ -410,7 +474,11 @@ def main():
                         if new_rel:
                             car.reliability_rating = float(new_rel)
 
-                    # Save to file using exact method name
+                    elif isinstance(car, AmbulanceCar):
+                        new_med = input(f"Medical Level Score [{car.medical_level_score}]: ").strip()
+                        if new_med:
+                            car.medical_level_score = float(new_med)
+
                     manager.saveToFile()
                     print(f"Vehicle #{car.car_number} updated successfully!")
 
@@ -426,7 +494,7 @@ def main():
                     print(f"- #{c.car_number}: {c.full_name} ({c.__class__.__name__}) | Team: {c.racing_team} | Score: {c.per_score()}")
 
         elif choice == "5":
-            print("\n--- Retire Vehicle ---")
+            print("\n--- Retire Vehicl---")
             num = input("Enter Car Number to Retire: ").strip()
             if manager.carRetire(num):
                 print(f"Vehicle #{num} retired successfully.")
